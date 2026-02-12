@@ -14,6 +14,6 @@ curl -fsSL https://starship.rs/install.sh | bash -s -- --yes
 # Install Zellij
 brew install zellij
 # Install Ghostty (GUI for Zellij)
-brew install ghostty
+brew install ghostty@tip
 # Font is JetBrains Mono
 brew install --cask jetbrains-mono
