@@ -1,0 +1,30 @@
+// Zellij Configuration
+
+// Use Catppuccin Mocha to match Ghostty
+theme "catppuccin-mocha"
+
+// Simplified UI
+simplified_ui true
+pane_frames false
+
+// Default layout
+default_layout "compact"
+
+// Copy on select
+copy_on_select true
+
+// Scrollback
+scroll_buffer_size 50000
+
+// Session serialization (auto-save sessions)
+session_serialization true
+serialize_pane_viewport true
+
+// Mouse support
+mouse_mode true
+
+// Keybindings - use Ctrl+a as prefix (like screen/tmux)
+keybinds {
+    // Unbind default Ctrl+b to avoid conflict with shell
+    unbind "Ctrl b"
+}
