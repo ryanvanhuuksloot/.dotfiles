@@ -1,0 +1,70 @@
+# Completions
+# ===========================
+autoload -Uz compinit && compinit
+source <(kubectl completion zsh)
+
+# Shopify Tooling
+# ===========================
+if [[ -f /opt/dev/dev.sh ]] && [[ $- == *i* ]]; then
+  source /opt/dev/dev.sh
+fi
+
+[[ -f /opt/dev/sh/chruby/chruby.sh ]] && { type chruby >/dev/null 2>&1 || chruby () { source /opt/dev/sh/chruby/chruby.sh; chruby "$@"; } }
+
+[[ -x /opt/homebrew/bin/brew ]] && eval $(/opt/homebrew/bin/brew shellenv)
+
+# cloudplatform: add Shopify clusters to your local kubernetes config
+export KUBECONFIG=${KUBECONFIG:+$KUBECONFIG:}/Users/ryanvanhuuksloot/.kube/config:/Users/ryanvanhuuksloot/.kube/config.shopify.cloudplatform
+for file in /Users/ryanvanhuuksloot/src/github.com/Shopify/cloudplatform/workflow-utils/*.bash; do source ${file}; done
+kubectl-short-aliases
+
+# PATH
+# ===========================
+export PATH=$PATH:/Users/ryanvanhuuksloot/bin
+export PATH=$PATH:/Applications/GoLand.app/Contents/MacOS
+export PATH=$PATH:/Applications/IntelliJ\ IDEA.app/Contents/MacOS
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
+# Environment
+# ===========================
+export JAVA_HOME=$(/usr/libexec/java_home)
+export KUBE_EDITOR='cursor --wait'
+
+# Tectonix
+# ===========================
+[[ -x ~/world/.tectonix/init ]] && eval "$(~/world/.tectonix/init zsh)"
+[[ -x /Users/ryanvanhuuksloot/world/.tectonix/nix-profiles/base/current/global/init ]] && eval "$(/Users/ryanvanhuuksloot/world/.tectonix/nix-profiles/base/current/global/init zsh)"
+[[ -x /Users/ryanvanhuuksloot/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/ryanvanhuuksloot/.local/state/tec/profiles/base/current/global/init zsh)"
+
+# Cheat sheet
+# ===========================
+alias '?'='cheatsheet'
+
+# Zellij auto-rename tab based on recent commands
+# ===========================
+if [[ -n "${ZELLIJ:-}" ]]; then
+  typeset -ga __zellij_cmd_history=()
+
+  __zellij_preexec() {
+    local cmd="$1"
+    # Skip trivial commands
+    [[ "$cmd" == (ls|cd|clear|pwd|echo|cat) ]] && return
+    # Track last 10 commands
+    __zellij_cmd_history+=("$cmd")
+    (( ${#__zellij_cmd_history[@]} > 10 )) && __zellij_cmd_history=("${__zellij_cmd_history[@]: -10}")
+    # Derive a tab name from recent commands
+    local name
+    name=$(printf '%s\n' "${__zellij_cmd_history[@]}" \
+      | sed 's/[|;&].*//; s/ .*//' \
+      | sort | uniq -c | sort -rn \
+      | head -1 | awk '{print $2}')
+    [[ -n "$name" ]] && zellij action rename-tab "$name" 2>/dev/null
+  }
+
+  autoload -Uz add-zsh-hook
+  add-zsh-hook preexec __zellij_preexec
+fi
+
+# Starship prompt (must be last)
+# ===========================
+eval "$(starship init zsh)"
