@@ -28,6 +28,7 @@ export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 # Environment
 # ===========================
 export JAVA_HOME=$(/usr/libexec/java_home)
+export EDITOR='cursor --wait'
 export KUBE_EDITOR='cursor --wait'
 
 # Tectonix
