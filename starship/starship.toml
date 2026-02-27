@@ -31,57 +31,65 @@ disabled = true
 
 # Staged files — green
 [custom.git_staged]
-command = "s=$(git diff --cached --name-only 2>/dev/null | wc -l | tr -d ' '); [ \"$s\" -gt 0 ] && printf '+%s' \"$s\""
+command = "s=$(timeout 0.4 git diff --cached --name-only 2>/dev/null | wc -l | tr -d ' '); [ $? -eq 124 ] && printf '+?' && exit; [ \"$s\" -gt 0 ] && printf '+%s' \"$s\""
 when = true
+ignore_timeout = true
 format = "([$output](bold #a6e3a1) )"
 
 # Modified files — yellow
 [custom.git_modified]
-command = "m=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' '); [ \"$m\" -gt 0 ] && printf '~%s' \"$m\""
+command = "m=$(timeout 0.4 git diff --name-only 2>/dev/null | wc -l | tr -d ' '); [ $? -eq 124 ] && printf '~?' && exit; [ \"$m\" -gt 0 ] && printf '~%s' \"$m\""
 when = true
+ignore_timeout = true
 format = "([$output](bold #f9e2af) )"
 
-# Untracked files — orange (ignore_timeout: works in fast repos, silently skips in monorepos)
+# Untracked files — orange
 [custom.git_untracked]
-command = "u=$(git ls-files --others --exclude-standard 2>/dev/null | wc -l | tr -d ' '); [ \"$u\" -gt 0 ] && printf '?%s' \"$u\""
+command = "u=$(timeout 0.4 git ls-files --others --exclude-standard 2>/dev/null | wc -l | tr -d ' '); [ $? -eq 124 ] && printf '??' && exit; [ \"$u\" -gt 0 ] && printf '?%s' \"$u\""
 when = true
 ignore_timeout = true
 format = "([$output](bold #fab387) )"
 
 # Deleted files — red
 [custom.git_deleted]
-command = "d=$(git diff --diff-filter=D --name-only 2>/dev/null | wc -l | tr -d ' '); [ \"$d\" -gt 0 ] && printf 'x%s' \"$d\""
+command = "d=$(timeout 0.4 git diff --diff-filter=D --name-only 2>/dev/null | wc -l | tr -d ' '); [ $? -eq 124 ] && printf 'x?' && exit; [ \"$d\" -gt 0 ] && printf 'x%s' \"$d\""
 when = true
+ignore_timeout = true
 format = "([$output](bold #f38ba8) )"
 
 # Conflicted files — red
 [custom.git_conflicted]
-command = "c=$(git ls-files --unmerged 2>/dev/null | cut -f2 | sort -u | wc -l | tr -d ' '); [ \"$c\" -gt 0 ] && printf '=%s' \"$c\""
+command = "c=$(timeout 0.4 git ls-files --unmerged 2>/dev/null | cut -f2 | sort -u | wc -l | tr -d ' '); [ $? -eq 124 ] && printf '=?' && exit; [ \"$c\" -gt 0 ] && printf '=%s' \"$c\""
 when = true
+ignore_timeout = true
 format = "([$output](bold #f38ba8) )"
 
 # Renamed files — orange
 [custom.git_renamed]
-command = "r=$(git diff --cached --diff-filter=R --name-only 2>/dev/null | wc -l | tr -d ' '); [ \"$r\" -gt 0 ] && printf '»%s' \"$r\""
+command = "r=$(timeout 0.4 git diff --cached --diff-filter=R --name-only 2>/dev/null | wc -l | tr -d ' '); [ $? -eq 124 ] && printf '»?' && exit; [ \"$r\" -gt 0 ] && printf '»%s' \"$r\""
 when = true
+ignore_timeout = true
 format = "([$output](bold #fab387) )"
 
 # Stashed changes — lavender
 [custom.git_stash]
-command = "s=$(git stash list 2>/dev/null | wc -l | tr -d ' '); [ \"$s\" -gt 0 ] && printf '*%s' \"$s\""
+command = "s=$(timeout 0.4 git stash list 2>/dev/null | wc -l | tr -d ' '); [ $? -eq 124 ] && printf '*?' && exit; [ \"$s\" -gt 0 ] && printf '*%s' \"$s\""
 when = true
+ignore_timeout = true
 format = "([$output](bold #f2cdcd) )"
 
 # Ahead of remote (unpushed commits) — blue
 [custom.git_ahead]
-command = "a=$(git rev-list --count '@{upstream}..HEAD' 2>/dev/null); [ \"$a\" -gt 0 ] && printf '⇡%s' \"$a\""
+command = "a=$(timeout 0.4 git rev-list --count '@{upstream}..HEAD' 2>/dev/null); [ $? -eq 124 ] && printf '⇡?' && exit; [ \"$a\" -gt 0 ] && printf '⇡%s' \"$a\""
 when = true
+ignore_timeout = true
 format = "([$output](bold #89b4fa) )"
 
 # Behind remote (need to pull) — red
 [custom.git_behind]
-command = "b=$(git rev-list --count 'HEAD..@{upstream}' 2>/dev/null); [ \"$b\" -gt 0 ] && printf '⇣%s' \"$b\""
+command = "b=$(timeout 0.4 git rev-list --count 'HEAD..@{upstream}' 2>/dev/null); [ $? -eq 124 ] && printf '⇣?' && exit; [ \"$b\" -gt 0 ] && printf '⇣%s' \"$b\""
 when = true
+ignore_timeout = true
 format = "([$output](bold #f38ba8) )"
 
 # Graphite stack position — reads local cache, no Node.js
