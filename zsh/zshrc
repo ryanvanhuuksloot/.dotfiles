@@ -69,8 +69,18 @@ fi
 # fzf keybindings (ctrl-r, ctrl-t, alt-c)
 # ===========================
 export FZF_DEFAULT_OPTS='--reverse'
-export FZF_CTRL_R_OPTS='--bind=enter:accept-and-execute'
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# Override ctrl-r to auto-execute the selected command
+fzf-history-widget-accept() {
+  local orig_buffer="$BUFFER"
+  fzf-history-widget
+  if [[ "$BUFFER" != "$orig_buffer" && -n "$BUFFER" ]]; then
+    zle accept-line
+  fi
+}
+zle -N fzf-history-widget-accept
+bindkey '^R' fzf-history-widget-accept
 
 # Starship prompt (must be last)
 # ===========================
