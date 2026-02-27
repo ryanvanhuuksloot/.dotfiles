@@ -92,28 +92,18 @@ when = true
 ignore_timeout = true
 format = "([$output](bold #f38ba8) )"
 
-# Graphite stack position — reads local cache, no Node.js
+# Graphite stack — show child branch count only
 [custom.gt_stack]
-command = """python3 -c "
-import json, os, sys
-try:
-    git_dir = os.popen('git rev-parse --git-dir 2>/dev/null').read().strip()
-    branch = os.popen('git rev-parse --abbrev-ref HEAD 2>/dev/null').read().strip()
-    cache = os.path.join(git_dir, '.graphite_cache_persist')
-    if not os.path.exists(cache) or branch == 'main': sys.exit()
-    with open(cache) as f: data = json.load(f)
-    branches = dict(data.get('branches', []))
-    if branch not in branches: sys.exit()
-    info = branches[branch]
-    depth, b = 0, branch
-    while b in branches and branches[b].get('parentBranchName'):
-        depth += 1; b = branches[b]['parentBranchName']
-    children = len(info.get('children', []))
-    if depth: print(f'{depth}↑{children}↓' if children else f'{depth}↑')
-    elif children: print(f'{children}↓')
-except: pass
-" """
+command = """
+gd=$(git rev-parse --git-dir 2>/dev/null) || exit
+br=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || exit
+cache="$gd/.graphite_cache_persist"
+[ -f "$cache" ] && [ "$br" != "main" ] || exit
+ch=$(jq -r --arg b "$br" '[.branches[] | select(.[0]==$b)] | .[0][1].children // [] | length' "$cache" 2>/dev/null)
+[ "${ch:-0}" -gt 0 ] && printf '%s↓' "$ch"
+"""
 when = "test -f \"$(git rev-parse --git-dir 2>/dev/null)/.graphite_cache_persist\" 2>/dev/null"
+ignore_timeout = true
 format = "([$output](bold #f5c2e7) )"
 
 # Git state (rebase, merge, etc.)
